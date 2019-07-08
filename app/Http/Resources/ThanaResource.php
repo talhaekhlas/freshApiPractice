@@ -3,9 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\ThanaResource;
 
-class DistrictResource extends JsonResource
+class ThanaResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -20,9 +19,7 @@ class DistrictResource extends JsonResource
             'href' => [
                 'link' => route('district.show',$this->id)
             ],
-            'thanas'=>ThanaResource::collection($this->thanas)
         ];
-
-        return parent::toArray($request);
+        //return parent::toArray($request);
     }
 }
