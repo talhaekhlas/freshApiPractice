@@ -13,11 +13,14 @@ class DistrictController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        return $request->page;
         //return District::with(['thanas'])->get();
 
-        return DistrictResource::collection(District::with(['thanas'])->paginate(10));
+        
+
+        return DistrictResource::collection(District::with(['thanas'])->paginate(1));
     }
 
     /**
