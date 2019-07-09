@@ -14,12 +14,21 @@ class TodoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+     public function __construct()
+     {
+        $this->middleware('auth:api')->except('index','show');
+     }
     public function index(Request $request)
     {
         //return Todo::all();
 
         $limit = $request->limit;
         $skip = $request->page;
+
+        if(!$request->limit || !$request->page){
+            return TodoResource::collection(Todo::all());
+        }
         return TodoResource::collection(Todo::skip($skip*$limit)->take($limit)->get());
     }
 
@@ -41,7 +50,8 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        
+        Todo::create($request->all());
+        return '{"message":"data created succesfully"}';
     }
 
     /**
@@ -75,7 +85,10 @@ class TodoController extends Controller
      */
     public function update(Request $request, Todo $todo)
     {
-        //
+        
+        Todo::where('id',$todo->id)->update($request->all());
+
+        return '{"message":"data updated succesfully"}';
     }
 
     /**
@@ -86,6 +99,8 @@ class TodoController extends Controller
      */
     public function destroy(Todo $todo)
     {
-        //
+        Todo::where('id',$todo->id)->delete();
+
+        return '{"message":"data deteted succesfully"}';
     }
 }
