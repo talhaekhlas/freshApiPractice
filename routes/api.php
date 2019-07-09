@@ -18,3 +18,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('district','DistrictController');
+
+Route::apiResource('todo','TodoController');

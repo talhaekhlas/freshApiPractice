@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Todo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TodoResource;
 
 class TodoController extends Controller
 {
@@ -13,9 +14,13 @@ class TodoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        //return Todo::all();
+
+        $limit = $request->limit;
+        $skip = $request->page;
+        return TodoResource::collection(Todo::skip($skip*$limit)->take($limit)->get());
     }
 
     /**
@@ -36,7 +41,7 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**
@@ -47,7 +52,7 @@ class TodoController extends Controller
      */
     public function show(Todo $todo)
     {
-        //
+        return $todo;
     }
 
     /**
