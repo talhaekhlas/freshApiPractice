@@ -21,15 +21,30 @@ class TodoController extends Controller
      }
     public function index(Request $request)
     {
-        //return Todo::all();
-
+        
+        
         $limit = $request->limit;
         $skip = $request->page;
 
         if(!$request->limit || !$request->page){
-            return TodoResource::collection(Todo::all());
+            $data['total'] = Todo::select('id','name')->count();
+            $data['data'] = Todo::select('id','name')->get();
+        }else{
+            $data['total'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get()->count();
+            $data['data'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get();
         }
-        return TodoResource::collection(Todo::skip($skip*$limit)->take($limit)->get());
+
+        
+
+        return $data;
+
+        // $limit = $request->limit;
+        // $skip = $request->page;
+
+        // if(!$request->limit || !$request->page){
+        //     return TodoResource::collection(Todo::all());
+        // }
+        // return TodoResource::collection(Todo::skip($skip*$limit)->take($limit)->get());
     }
 
     /**
@@ -60,9 +75,16 @@ class TodoController extends Controller
      * @param  \App\Models\Todo  $todo
      * @return \Illuminate\Http\Response
      */
-    public function show(Todo $todo)
+    public function show($id)
     {
-        return $todo;
+        $data['data'] = Todo::where('id',$id)->first();
+
+        if($data['data']){
+            return $data;
+        }else {
+            $data['message'] = 'Invalid Id'; 
+            return $data;
+        }
     }
 
     /**
