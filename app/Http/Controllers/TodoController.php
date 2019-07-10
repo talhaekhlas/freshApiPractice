@@ -6,6 +6,8 @@ use App\Models\Todo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TodoResource;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Validator;
 
 class TodoController extends Controller
 {
@@ -17,7 +19,7 @@ class TodoController extends Controller
 
      public function __construct()
      {
-        $this->middleware('auth:api')->except('index','show');
+        // $this->middleware('auth:api')->except('index','show');
      }
     public function index(Request $request)
     {
@@ -26,36 +28,51 @@ class TodoController extends Controller
         $limit = $request->limit;
         $skip = $request->page;
 
+
+        /**
+         * Data Without Pagination
+         */
         if(!$request->limit || !$request->page){
+            
+            $data['total'] = Todo::select('id','name')->count();
+            if($data['total']){
+                $data['message'] = 'Data Found';
+                $data['status'] = Response::HTTP_FOUND;
+            }else{
+                $data['message'] = 'Data Not Found';
+                $data['status'] = Response::HTTP_NOT_FOUND;
+            }
+
             $data['total'] = Todo::select('id','name')->count();
             $data['data'] = Todo::select('id','name')->get();
-        }else{
-            $data['total'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get()->count();
-            $data['data'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get();
+
+            return response($data, Response::HTTP_OK);
+
         }
 
-        
 
-        return $data;
+        /**
+         * Data With Pagination
+         */
+            
+        $data['total'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get()->count();
 
-        // $limit = $request->limit;
-        // $skip = $request->page;
+        if($data['total']){
+            $data['message'] = 'Data Found';
+            $data['status'] = Response::HTTP_FOUND;
+        }else{
+            $data['message'] = 'Data Not Found';
+            $data['status'] = Response::HTTP_NOT_FOUND;
+        }
 
-        // if(!$request->limit || !$request->page){
-        //     return TodoResource::collection(Todo::all());
-        // }
-        // return TodoResource::collection(Todo::skip($skip*$limit)->take($limit)->get());
+        $data['total'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get()->count();
+        $data['data'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get();
+
+        return response($data, Response::HTTP_OK);
+       
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -65,8 +82,44 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        Todo::create($request->all());
-        return '{"message":"data created succesfully"}';
+        $data = [];
+        /**
+         * Data Validation
+         */
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:todos|max:20',
+            'user_id' => 'required|exists:users,id',
+            
+        ]);
+
+        $errors = $validator->errors();
+        
+        if($errors->first('name')){
+            $data['name'] = $errors->first('name');
+        }
+
+        if($errors->first('user_id')){
+            $data['user_id'] = $errors->first('user_id');
+        }
+
+        if(isset($data['name']) || isset($data['user_id'])){
+            $data['status'] = Response::HTTP_UNPROCESSABLE_ENTITY;
+            $data['message'] = 'Unprocessable Entity';
+            $data['data'] = [];
+            return response($data, Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+
+        /**
+         * Data Save
+         */
+
+        $data['status'] = Response::HTTP_OK;
+        $data['message'] = 'data inserted succesfully';
+        $data['data'] = Todo::create($request->all());
+
+        return response($data, Response::HTTP_OK);
     }
 
     /**
@@ -77,27 +130,36 @@ class TodoController extends Controller
      */
     public function show($id)
     {
-        $data['data'] = Todo::where('id',$id)->first();
+        /**
+         * Data not found
+         */
+        $data = [];
+        $check = Todo::where('id',$id)->get();
 
-        if($data['data']){
-            return $data;
-        }else {
-            $data['message'] = 'Invalid Id'; 
-            return $data;
+        if(!count($check)){
+            $data['message'] = 'Not Found';
+            $data['status'] = Response::HTTP_NOT_FOUND;
+            $data['data'] = [];
+
+            return response($data, Response::HTTP_NOT_FOUND);
+            
         }
+
+
+        /**
+         * Data found
+         */
+        $data['message'] = 'Data Found';
+        $data['status'] = Response::HTTP_FOUND;
+        $data['data'] = Todo::select('name','id')->where('id',$id)->first();
+
+        return response($data, Response::HTTP_FOUND);
+            
+       
+
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Todo  $todo
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Todo $todo)
-    {
-        //
-    }
-
+   
     /**
      * Update the specified resource in storage.
      *
@@ -105,12 +167,62 @@ class TodoController extends Controller
      * @param  \App\Models\Todo  $todo
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Todo $todo)
+    public function update(Request $request, $id)
     {
-        
-        Todo::where('id',$todo->id)->update($request->all());
 
-        return '{"message":"data updated succesfully"}';
+        /**
+         * Data not found
+         */
+        $data = [];
+        $check = Todo::where('id',$id)->get();
+
+        if(!count($check)){
+            $data['message'] = 'Not Found';
+            $data['status'] = Response::HTTP_NOT_FOUND;
+            $data['data'] = [];
+
+            return response($data, Response::HTTP_NOT_FOUND);
+            
+        }
+
+        
+
+        /**
+         * Data Validation
+         */
+
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:todos|max:20',
+            
+        ]);
+
+        $errors = $validator->errors();
+        
+        if($errors->first('name')){
+            $data['name'] = $errors->first('name');
+        }
+
+        if(isset($data['name'])){
+            $data['status'] = Response::HTTP_UNPROCESSABLE_ENTITY;
+            $data['message'] = 'Unprocessable Entity';
+            $data['data'] = [];
+            return response($data, Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        
+
+         /**
+         * Data Update
+         */
+        
+        Todo::where('id',$id)->update($request->all());
+        $data['status'] = Response::HTTP_OK;
+        $data['message'] = 'data updated succesfully';
+        $data['data'] = Todo::select('name','id')->where('id',$id)->first();
+
+        return response($data, Response::HTTP_OK);
+
     }
 
     /**
@@ -119,10 +231,32 @@ class TodoController extends Controller
      * @param  \App\Models\Todo  $todo
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Todo $todo)
+    public function destroy($id)
     {
-        Todo::where('id',$todo->id)->delete();
+         /**
+         * Data not found
+         */
+        $data = [];
+        $check = Todo::where('id',$id)->get();
 
-        return '{"message":"data deteted succesfully"}';
+        if(!count($check)){
+            $data['message'] = 'Not Found';
+            $data['status'] = Response::HTTP_NOT_FOUND;
+            $data['data'] = [];
+
+            return response($data, Response::HTTP_NOT_FOUND);
+            
+        }
+
+        
+
+        /**
+         * Data Delete
+         */
+        
+        Todo::where('id',$id)->delete();
+        $data['status'] = Response::HTTP_OK;
+        $data['message'] = 'data deleted succesfully';
+        return response($data, Response::HTTP_OK);
     }
 }
