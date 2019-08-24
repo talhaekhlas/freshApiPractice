@@ -19,7 +19,7 @@ class TodoController extends Controller
 
      public function __construct()
      {
-        // $this->middleware('auth:api')->except('index','show');
+        // $this->middleware('auth:api')->except('show');
      }
     public function index(Request $request)
     {
@@ -37,17 +37,22 @@ class TodoController extends Controller
             $data['total'] = Todo::select('id','name')->count();
             if($data['total']){
                 $data['message'] = 'Data Found';
-                $data['status'] = Response::HTTP_FOUND;
+                $data['total'] = Todo::select('id','name')->count();
+                $data['data'] = Todo::select('id','name')->get();
+                return response($data, Response::HTTP_OK);
+
+                
             }else{
                 $data['message'] = 'Data Not Found';
-                $data['status'] = Response::HTTP_NOT_FOUND;
+                $data['total'] = Todo::select('id','name')->count();
+                $data['data'] = Todo::select('id','name')->get();
+                return response($data, Response::HTTP_NOT_FOUND);
+                
             }
 
-            $data['total'] = Todo::select('id','name')->count();
-            $data['data'] = Todo::select('id','name')->get();
+            
 
-            return response($data, Response::HTTP_OK);
-
+            
         }
 
 
@@ -59,16 +64,21 @@ class TodoController extends Controller
 
         if($data['total']){
             $data['message'] = 'Data Found';
-            $data['status'] = Response::HTTP_FOUND;
+            $data['total'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get()->count();
+            $data['data'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get();
+            return response($data, Response::HTTP_FOUND);
+            
         }else{
             $data['message'] = 'Data Not Found';
-            $data['status'] = Response::HTTP_NOT_FOUND;
+            $data['total'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get()->count();
+            $data['data'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get();
+            return response($data, Response::HTTP_NOT_FOUND);
+            
         }
 
-        $data['total'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get()->count();
-        $data['data'] = Todo::select('id','name')->skip($skip*$limit)->take($limit)->get();
+        
 
-        return response($data, Response::HTTP_OK);
+        
        
     }
 
@@ -104,7 +114,7 @@ class TodoController extends Controller
         }
 
         if(isset($data['name']) || isset($data['user_id'])){
-            $data['status'] = Response::HTTP_UNPROCESSABLE_ENTITY;
+           
             $data['message'] = 'Unprocessable Entity';
             $data['data'] = [];
             return response($data, Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -115,7 +125,7 @@ class TodoController extends Controller
          * Data Save
          */
 
-        $data['status'] = Response::HTTP_OK;
+        
         $data['message'] = 'data inserted succesfully';
         $data['data'] = Todo::create($request->all());
 
@@ -138,7 +148,7 @@ class TodoController extends Controller
 
         if(!count($check)){
             $data['message'] = 'Not Found';
-            $data['status'] = Response::HTTP_NOT_FOUND;
+            
             $data['data'] = [];
 
             return response($data, Response::HTTP_NOT_FOUND);
@@ -150,10 +160,10 @@ class TodoController extends Controller
          * Data found
          */
         $data['message'] = 'Data Found';
-        $data['status'] = Response::HTTP_FOUND;
+       
         $data['data'] = Todo::select('name','id')->where('id',$id)->first();
 
-        return response($data, Response::HTTP_FOUND);
+        return response($data, Response::HTTP_OK);
             
        
 
@@ -178,7 +188,7 @@ class TodoController extends Controller
 
         if(!count($check)){
             $data['message'] = 'Not Found';
-            $data['status'] = Response::HTTP_NOT_FOUND;
+            
             $data['data'] = [];
 
             return response($data, Response::HTTP_NOT_FOUND);
@@ -204,7 +214,7 @@ class TodoController extends Controller
         }
 
         if(isset($data['name'])){
-            $data['status'] = Response::HTTP_UNPROCESSABLE_ENTITY;
+            
             $data['message'] = 'Unprocessable Entity';
             $data['data'] = [];
             return response($data, Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -217,7 +227,7 @@ class TodoController extends Controller
          */
         
         Todo::where('id',$id)->update($request->all());
-        $data['status'] = Response::HTTP_OK;
+        
         $data['message'] = 'data updated succesfully';
         $data['data'] = Todo::select('name','id')->where('id',$id)->first();
 

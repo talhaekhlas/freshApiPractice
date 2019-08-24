@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 use App\User;
+use Auth;
 
-class UserController extends Controller
+
+class CustomAuthController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,56 +18,24 @@ class UserController extends Controller
      */
     public function __construct()
      {
-        $this->middleware('auth:api')->except('index','show');
+        // $this->middleware('auth:api')->except('index','show');
      }
 
 
-    public function index(Request $request)
+    public function loginTalha(Request $request)
     {
-        $limit = $request->limit;
-        $skip = $request->page;
-
-
-        /**
-         * Data Without Pagination
-         */
-        if(!$request->limit || !$request->page){
-            
-            $data['total'] = User::select('id','name','email')->count();
-            if($data['total']){
-                $data['message'] = 'Data Found';
-                $data['status'] = Response::HTTP_FOUND;
-            }else{
-                $data['message'] = 'Data Not Found';
-                $data['status'] = Response::HTTP_NOT_FOUND;
+        $email = $request->email;
+        $password = $request->password;
+            if (Auth::attempt(array('email' => $email, 'password' => $password))){
+            return "success";
             }
-
-            $data['total'] = User::select('id','name','email')->count();
-            $data['data'] = User::select('id','name','email')->get();
-
-            return response($data, Response::HTTP_OK);
-
-        }
-
-
-        /**
-         * Data With Pagination
-         */
-            
-        $data['total'] = User::select('id','name','email')->skip($skip*$limit)->take($limit)->get()->count();
-
-        if($data['total']){
-            $data['message'] = 'Data Found';
-            $data['status'] = Response::HTTP_FOUND;
-        }else{
-            $data['message'] = 'Data Not Found';
-            $data['status'] = Response::HTTP_NOT_FOUND;
-        }
-
-        $data['total'] = User::select('id','name','email')->skip($skip*$limit)->take($limit)->get()->count();
-        $data['data'] = User::select('id','name','email')->skip($skip*$limit)->take($limit)->get();
-
-        return response($data, Response::HTTP_OK);
+            else {        
+                return "Wrong Credentials";
+            }
+        
+        
+        return $check = User::where('email',$request->email)->where('password',bcrypt($request->password))->first();
+        return $request->all();
     }
 
     /**

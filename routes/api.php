@@ -22,3 +22,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::apiResource('todo','TodoController');
 
 Route::apiResource('user','UserController');
+
+Route::post('loginTalha','CustomAuthController@loginTalha');
