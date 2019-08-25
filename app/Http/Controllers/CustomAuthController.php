@@ -63,8 +63,7 @@ class CustomAuthController extends Controller
             User::create($data);
 
             $responseData['message'] = 'Successfully Inserted';
-            $responseData['token'] = 'test_token';
-            $responseData['password'] = $request->password;
+            $responseData['data'] = $request->except(['password','confirm_password']);
             
             return response($responseData, Response::HTTP_OK);
         }else{
