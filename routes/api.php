@@ -24,3 +24,5 @@ Route::apiResource('todo','TodoController');
 Route::apiResource('user','UserController');
 
 Route::post('loginTalha','CustomAuthController@loginTalha');
+
+Route::post('registerTalha','CustomAuthController@registerTalha');

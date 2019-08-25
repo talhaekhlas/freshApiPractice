@@ -38,6 +38,42 @@ class CustomAuthController extends Controller
         return $request->all();
     }
 
+
+    public function registerTalha(Request $request)
+    {
+
+
+        if($request->password == $request->confirm_password){
+
+            
+
+            $checkExist = User::where('email',$request->email)->get();
+
+            if(count($checkExist)){
+
+                $responseData['message'] = 'Duplicate Entry';
+                $responseData['data'] = [];
+                return response($responseData, Response::HTTP_OK);
+            }
+
+            $data = $request->except(['corfirm_password']);
+
+            $data['password'] = bcrypt($request->password);
+ 
+            User::create($data);
+
+            $responseData['message'] = 'Successfully Inserted';
+            $responseData['token'] = 'test_token';
+            $responseData['password'] = $request->password;
+            
+            return response($responseData, Response::HTTP_OK);
+        }else{
+            $responseData['message'] = 'Password Mismatch';
+            $responseData['data'] = [];
+            return response($responseData, Response::HTTP_NOT_FOUND);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *
