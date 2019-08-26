@@ -18,24 +18,29 @@ class CustomAuthController extends Controller
      */
     public function __construct()
      {
-        // $this->middleware('auth:api')->except('index','show');
+        $this->middleware('auth:api')->except('index','show');
      }
 
 
     public function loginTalha(Request $request)
     {
-        $email = $request->email;
-        $password = $request->password;
-            if (Auth::attempt(array('email' => $email, 'password' => $password))){
-            return "success";
-            }
-            else {        
-                return "Wrong Credentials";
-            }
-        
-        
-        return $check = User::where('email',$request->email)->where('password',bcrypt($request->password))->first();
-        return $request->all();
+         if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){ 
+            $user = Auth::user(); 
+            $responseData['error'] = false;
+            // $responseData['status'] = $this->successStatus;
+            $responseData['resMsg'] = "You have logged in successfully.";
+            $responseData['user'] = $user;
+            $responseData['token'] = $user->createToken('MyApp')->accessToken;
+            
+            return response()->json($responseData); 
+        } 
+        else{ 
+            $responseData['error'] = true;
+            $responseData['status'] = 401;
+            $responseData['resMsg'] = "Unauthorised.";
+            
+            return response()->json($responseData); 
+        } 
     }
 
 
