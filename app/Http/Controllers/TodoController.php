@@ -19,7 +19,7 @@ class TodoController extends Controller
 
      public function __construct()
      {
-        $this->middleware('auth:api')->except('show');
+        // $this->middleware('auth:api')->except('show');
      }
     public function index(Request $request)
     {

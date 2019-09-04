@@ -26,8 +26,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // $role = Role::create(['name' => 'editor']);
-        // $permission = Permission::create(['name' => 'edit articles']);
+        $role = Role::create(['name' => 'editor']);
+        $permission = Permission::create(['name' => 'edit articles']);
+
+        return 0;
 
         // $user = Auth::user();
 

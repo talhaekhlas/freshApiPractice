@@ -18,7 +18,7 @@ class CustomAuthController extends Controller
      */
     public function __construct()
      {
-        $this->middleware('auth:api')->except('index','show');
+        // $this->middleware('auth:api')->except('index','show');
      }
 
 
@@ -65,10 +65,12 @@ class CustomAuthController extends Controller
 
             $data['password'] = bcrypt($request->password);
  
-            User::create($data);
+            $user  = User::create($data);
+
 
             $responseData['message'] = 'Successfully Inserted';
-            $responseData['data'] = $request->except(['password','confirm_password']);
+
+            $responseData['data'] = $user;
             
             return response($responseData, Response::HTTP_OK);
         }else{
@@ -131,6 +133,18 @@ class CustomAuthController extends Controller
         $data['data'] = User::select('name','id')->where('id',$id)->first();
 
         return response($data, Response::HTTP_FOUND);
+    }
+
+
+    public function duplicateCheck(Request $request)
+    {
+        $duplicateCheck = User::where('email',$request->email)->get();
+
+        if(count($duplicateCheck)){
+            return 'duplicate';
+        }else{
+            return 'no';
+        }
     }
 
     /**
