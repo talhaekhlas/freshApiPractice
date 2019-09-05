@@ -98,6 +98,31 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        //
+         /**
+         * Data not found
+         */
+        $data = [];
+        $check = Role::where('id',$id)->get();
+
+        if(!count($check)){
+            $data['message'] = 'Not Found';
+            
+            $data['data'] = [];
+
+            return response($data, Response::HTTP_NOT_FOUND);
+            
+        }
+
+        
+
+        /**
+         * Data Delete
+         */
+        
+        Role::where('id',$id)->delete();
+       
+        $data['message'] = 'data deleted succesfully';
+        $data['data'] = Role::orderBy('id','desc')->get();
+        return response($data, Response::HTTP_OK);
     }
 }

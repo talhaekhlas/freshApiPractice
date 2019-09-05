@@ -251,21 +251,17 @@ class TodoController extends Controller
 
         if(!count($check)){
             $data['message'] = 'Not Found';
-            $data['status'] = Response::HTTP_NOT_FOUND;
             $data['data'] = [];
-
             return response($data, Response::HTTP_NOT_FOUND);
             
         }
 
-        
 
         /**
          * Data Delete
          */
         
         Todo::where('id',$id)->delete();
-        $data['status'] = Response::HTTP_OK;
         $data['message'] = 'data deleted succesfully';
         return response($data, Response::HTTP_OK);
     }
