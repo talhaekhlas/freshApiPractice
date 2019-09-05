@@ -28,3 +28,5 @@ Route::post('loginTalha','CustomAuthController@loginTalha');
 Route::post('registerTalha','CustomAuthController@registerTalha');
 
 Route::get('duplicateCheck','CustomAuthController@duplicateCheck');
+
+Route::apiResource('role','RoleController');
