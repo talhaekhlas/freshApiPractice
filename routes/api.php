@@ -30,3 +30,7 @@ Route::post('registerTalha','CustomAuthController@registerTalha');
 Route::get('duplicateCheck','CustomAuthController@duplicateCheck');
 
 Route::apiResource('role','RoleController');
+
+Route::get('userList','HomeController@userList');
+
+Route::apiResource('permission','PermissionController');
