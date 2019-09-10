@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use DB;
 
 class PermissionController extends Controller
 {
@@ -30,69 +31,33 @@ class PermissionController extends Controller
         return response($data, Response::HTTP_OK);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function permissionOfRole($roleId)
     {
-        //
-    }
+        $permissionOfRole = DB::table('role_has_permissions')->where('role_id',$roleId)->pluck('permission_id');
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+        $data['message'] = "all permission of specific role";
+        $data['total'] = count($permissionOfRole);
+        $data['data'] = $permissionOfRole;
+        return response($data, Response::HTTP_OK);
+        
     }
+    
+    public function permissionSet(Request $request)
+    {
+        DB::table('role_has_permissions')->where('role_id',$request->roleId)->delete();
+        foreach ($request->permission as $permissionId) {
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+            DB::table('role_has_permissions')->insert(
+                ['role_id'=>$request->roleId,'permission_id'=>$permissionId]
+            );
+            
+        }
+        $data['message'] = "Permission set Successfully";
+        return response($data, Response::HTTP_OK);
+        
     }
+    
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+    
 }

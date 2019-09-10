@@ -34,3 +34,11 @@ Route::apiResource('role','RoleController');
 Route::get('userList','HomeController@userList');
 
 Route::apiResource('permission','PermissionController');
+
+Route::get('permissionOfRole/{roleId}','PermissionController@permissionOfRole');
+
+Route::post('permissionSet','PermissionController@permissionSet');
+
+
+
+
