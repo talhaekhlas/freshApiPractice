@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
+use App\User;
+use Auth;
 
 class PermissionController extends Controller
 {
@@ -56,6 +58,24 @@ class PermissionController extends Controller
         $data['message'] = "Permission set Successfully";
         return response($data, Response::HTTP_OK);
         
+    }
+
+
+    public function userPermissionList()
+    {
+        $user = auth::user();
+
+        $getPermissionsViaRoles = $user->getPermissionsViaRoles();
+
+        $permissions = [];
+        foreach ($getPermissionsViaRoles as $key => $value) {
+            $permissions[] = $value->name;
+        }
+
+        $data['message'] = "User Permission All List";
+        $data['data'] = $permissions;
+        return response($data, Response::HTTP_OK);
+
     }
     
 

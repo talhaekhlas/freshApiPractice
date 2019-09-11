@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use DB;
+use auth;
+use App\User;
 
 class RoleController extends Controller
 {
@@ -56,46 +59,7 @@ class RoleController extends Controller
         return '{"name":"Role Test"}';
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function destroy($id)
     {
          /**
@@ -124,5 +88,30 @@ class RoleController extends Controller
         $data['message'] = 'data deleted succesfully';
         $data['data'] = Role::orderBy('id','desc')->get();
         return response($data, Response::HTTP_OK);
+    }
+
+
+
+     public function roleOfUser($userId)
+    {
+        $roleOfUser = DB::table('model_has_roles')->where('model_id',$userId)->pluck('role_id');
+
+
+        $data['message'] = "all role of specific user";
+        $data['total'] = count($roleOfUser);
+        $data['data'] = $roleOfUser;
+        return response($data, Response::HTTP_OK);
+        
+    }
+    
+    public function roleSet(Request $request)
+    {
+        $user = User::find($request->userId);
+
+        $user->syncRoles($request->role);
+
+        $data['message'] = "role set Successfully";
+        return response($data, Response::HTTP_OK);
+        
     }
 }
